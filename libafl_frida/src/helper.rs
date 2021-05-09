@@ -1005,6 +1005,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
         Err(())
     }
 
+    #[cfg(target_arch = "aarch64")]
     #[inline]
     fn is_interesting_cmplog_instruction(
         &self,
