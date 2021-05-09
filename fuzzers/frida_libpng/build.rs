@@ -12,16 +12,15 @@ const LIBPNG_URL: &str =
     "https://deac-fra.dl.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz";
 
 fn build_dep_check(tools: &[&str]) {
-    for tool in tools.into_iter() {
+    for tool in tools {
         println!("Checking for build tool {}...", tool);
 
-        match which(tool) {
-            Ok(path) => println!("Found build tool {}", path.to_str().unwrap()),
-            Err(_) => {
-                println!("ERROR: missing build tool {}", tool);
-                exit(1);
-            }
-        };
+        if let Ok(path) = which(tool) {
+            println!("Found build tool {}", path.to_str().unwrap());
+        } else {
+            println!("ERROR: missing build tool {}", tool);
+            exit(1);
+        }
     }
 }
 
