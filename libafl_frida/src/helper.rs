@@ -9,10 +9,13 @@ use libafl::utils::find_mapping_for_path;
 use libafl_targets::drcov::{DrCovBasicBlock, DrCovWriter};
 
 #[cfg(target_arch = "aarch64")]
-use capstone::arch::{
-    arch::{self, BuildsCapstone},
-    arm64::{Arm64Extender, Arm64OperandType, Arm64Shift},
-    ArchOperand::Arm64Operand,
+use capstone::{
+    arch::{
+        self,
+        arm64::{Arm64Extender, Arm64OperandType, Arm64Shift},
+        ArchOperand::Arm64Operand,
+        BuildsCapstone,
+    },
     Capstone, Insn,
 };
 
@@ -396,7 +399,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
                 writer.put_ldr_reg_u64(Aarch64Register::X0, value);
             }
             CmplogOperandType::Regid(reg) => {
-                let reg = self.get_writer_register(reg);
+                let reg = self.writer_register(reg);
                 match reg {
                     Aarch64Register::X0 | Aarch64Register::W0 => {}
                     Aarch64Register::X1 | Aarch64Register::W1 => {
@@ -410,9 +413,9 @@ impl<'a> FridaInstrumentationHelper<'a> {
                 }
             }
             CmplogOperandType::Mem(basereg, indexreg, displacement, width) => {
-                let basereg = self.get_writer_register(basereg);
+                let basereg = self.writer_register(basereg);
                 let indexreg = if indexreg.0 != 0 {
-                    Some(self.get_writer_register(indexreg))
+                    Some(self.writer_register(indexreg))
                 } else {
                     None
                 };
@@ -461,7 +464,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
                 writer.put_ldr_reg_u64(Aarch64Register::X1, value);
             }
             CmplogOperandType::Regid(reg) => {
-                let reg = self.get_writer_register(reg);
+                let reg = self.writer_register(reg);
                 match reg {
                     Aarch64Register::X1 | Aarch64Register::W1 => {}
                     Aarch64Register::X0 | Aarch64Register::W0 => {
@@ -479,9 +482,9 @@ impl<'a> FridaInstrumentationHelper<'a> {
                 }
             }
             CmplogOperandType::Mem(basereg, indexreg, displacement, width) => {
-                let basereg = self.get_writer_register(basereg);
+                let basereg = self.writer_register(basereg);
                 let indexreg = if indexreg.0 != 0 {
-                    Some(self.get_writer_register(indexreg))
+                    Some(self.writer_register(indexreg))
                 } else {
                     None
                 };
@@ -688,6 +691,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
         shift: Arm64Shift,
         extender: Arm64Extender,
     ) {
+        let redzone_size = frida_gum_sys::GUM_RED_ZONE_SIZE as i32;
         let writer = output.writer();
 
         let basereg = self.writer_register(basereg);
@@ -1030,7 +1034,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
                     opmem.base(),
                     opmem.index(),
                     opmem.disp(),
-                    self.get_instruction_width(instr, &operands),
+                    self.instruction_width(instr, &operands),
                 )),
                 Arm64OperandType::Cimm(val) => Some(CmplogOperandType::Cimm(val as u64)),
                 _ => return Err(()),
@@ -1047,7 +1051,7 @@ impl<'a> FridaInstrumentationHelper<'a> {
                     opmem.base(),
                     opmem.index(),
                     opmem.disp(),
-                    self.get_instruction_width(instr, &operands),
+                    self.instruction_width(instr, &operands),
                 )),
                 Arm64OperandType::Cimm(val) => Some(CmplogOperandType::Cimm(val as u64)),
                 _ => return Err(()),
