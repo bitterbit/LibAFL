@@ -5,6 +5,9 @@ It can report coverage and, on supported architecutres, even reports memory acce
 
 /// The frida address sanitizer runtime
 pub mod asan_rt;
+/// The frida cmplog runtime
+pub mod cmplog_rt;
+
 /// The `LibAFL` firda helper
 pub mod helper;
 
@@ -19,6 +22,7 @@ pub struct FridaOptions {
     enable_coverage: bool,
     enable_drcov: bool,
     instrument_suppress_locations: Option<Vec<(String, usize)>>,
+    enable_cmplog: bool,
 }
 
 impl FridaOptions {
@@ -88,6 +92,9 @@ impl FridaOptions {
                             );
                         }
                     }
+                    "cmplog" => {
+                        options.enable_cmplog = value.parse().unwrap();
+                    }
                     _ => {
                         panic!("unknown FRIDA option: '{}'", option);
                     }
@@ -117,6 +124,12 @@ impl FridaOptions {
     #[inline]
     pub fn drcov_enabled(&self) -> bool {
         self.enable_drcov
+    }
+
+    /// Is CmpLog enabled?
+    #[inline]
+    pub fn cmplog_enabled(&self) -> bool {
+        self.enable_cmplog
     }
 
     /// Should ASAN detect leaks
@@ -165,6 +178,7 @@ impl Default for FridaOptions {
             enable_coverage: true,
             enable_drcov: false,
             instrument_suppress_locations: None,
+            enable_cmplog: true,
         }
     }
 }
