@@ -55,7 +55,7 @@ where
         feedback_index: usize,
     ) -> Result<bool, Error>
     where
-        EM: EventFirer<I, S>,
+        E: EventFirer<I, S>,
         OT: ObserversTuple,
     {
         // Start a timer for this feedback
@@ -761,13 +761,7 @@ where
     /// Append to the testcase the generated metadata in case of a new corpus item
     #[inline]
     fn append_metadata(&mut self, _state: &mut S, testcase: &mut Testcase<I>) -> Result<(), Error> {
-        if let Some(exec_time) = self.exec_time {
-            *testcase.exec_time_mut() = Some(exec_time);
-        } else {
-            return Err(Error::IllegalState("TimeFeedback is missing `exec_time` when append_metadata was called. 
-                                       Make sure you are not using a `FeedbackOrFast` as it might skip `is_interesting`".to_string()));
-        }
-
+        *testcase.exec_time_mut() = self.exec_time;
         self.exec_time = None;
         Ok(())
     }
