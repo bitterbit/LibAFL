@@ -12,7 +12,7 @@ use libafl::{
     },
     events::SimpleEventManager,
     executors::forkserver::{ForkserverExecutor, TimeoutForkserverExecutor},
-    feedback_and, feedback_or,
+    feedback_and, feedback_or_eager,
     feedbacks::{CrashFeedback, MapFeedbackState, MaxMapFeedback, TimeFeedback},
     fuzzer::{Fuzzer, StdFuzzer},
     inputs::BytesInput,
@@ -52,7 +52,7 @@ pub fn main() {
 
     // Feedback to rate the interestingness of an input
     // This one is composed by two Feedbacks in OR
-    let feedback = feedback_or!(
+    let feedback = feedback_or_eager!(
         // New maximization map feedback linked to the edges observer and the feedback state
         MaxMapFeedback::new_tracking(&feedback_state, &edges_observer, true, false),
         // Time feedback, this one does not need a feedback state
