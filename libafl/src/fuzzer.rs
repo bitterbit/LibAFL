@@ -410,7 +410,9 @@ where
         stats_timeout: Duration,
     ) -> Result<Duration, Error> {
         let cur = current_time();
-        if cur - last > stats_timeout {
+        let time_past = cur.checked_sub(last).unwrap_or(Duration::from_millis(0));
+        // if last update was sent more than `stats_timeout` away, send again
+        if time_past > stats_timeout {
             // Default no introspection implmentation
             #[cfg(not(feature = "introspection"))]
             manager.fire(

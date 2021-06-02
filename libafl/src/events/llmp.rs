@@ -190,8 +190,12 @@ where
                 phantom: _,
             } => {
                 let client = stats.client_stats_mut_for(sender_id);
-                client.update_user_stats(name.clone(), value.clone());
-                stats.display(event.name().to_string(), sender_id);
+                let has_new_data = client.update_user_stats(name.clone(), value.clone());
+                if has_new_data {
+                    println!("new data! {:?}", value);
+                    stats.display(event.name().to_string(), sender_id);
+                }
+
                 Ok(BrokerEventResult::Handled)
             }
             #[cfg(feature = "introspection")]

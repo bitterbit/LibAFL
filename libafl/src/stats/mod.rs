@@ -20,7 +20,7 @@ use crate::bolts::current_time;
 const CLIENT_STATS_TIME_WINDOW_SECS: u64 = 5; // 5 seconds
 
 /// User-defined stats types
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum UserStats {
     Number(u64),
     String(String),
@@ -122,8 +122,16 @@ impl ClientStats {
     }
 
     /// Update the user-defined stat with name and value
-    pub fn update_user_stats(&mut self, name: String, value: UserStats) {
+    pub fn update_user_stats(&mut self, name: String, value: UserStats) -> bool {
+        let mut changed = false;
+        if let Some(prev_value) = self.user_stats.get(&name) {
+            if prev_value != &value {
+                changed = true;
+            }
+        }
+
         self.user_stats.insert(name, value);
+        changed
     }
 
     /// Get a user-defined stat using the name

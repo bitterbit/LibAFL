@@ -120,10 +120,14 @@ where
                 value,
                 phantom: _,
             } => {
-                stats
+                let has_new_data = stats
                     .client_stats_mut_for(0)
                     .update_user_stats(name.clone(), value.clone());
-                stats.display(event.name().to_string(), 0);
+
+                if has_new_data {
+                    stats.display(event.name().to_string(), 0);
+                }
+
                 Ok(BrokerEventResult::Handled)
             }
             #[cfg(feature = "introspection")]
